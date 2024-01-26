@@ -93,7 +93,6 @@ public class PawnCalculator implements PieceMovesCalculator{
                 count++;
             }
             //Check left diagonal
-
             if(col > 1) {
                 ChessPosition left = new ChessPosition(row +1, col -1);
                 if (board.getPiece(left) != null && board.getPiece(left).getTeamColor() != color) {

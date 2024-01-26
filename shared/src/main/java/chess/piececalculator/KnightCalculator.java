@@ -1,9 +1,6 @@
 package chess.piececalculator;
 
-import chess.ChessBoard;
-import chess.ChessGame;
-import chess.ChessMove;
-import chess.ChessPosition;
+import chess.*;
 
 import java.util.Collection;
 import java.util.Dictionary;
@@ -19,19 +16,81 @@ public class KnightCalculator implements PieceMovesCalculator{
 
         int row = position.getRow();
         int col = position.getColumn();
+        ChessPosition checkPosition;
+        ChessPiece piece;
 
+        //Check top direction
+        if (row <= 6) {
+            if (col != 8) {
+                checkPosition = new ChessPosition(row + 2, col + 1);
+                piece = board.getPiece(checkPosition);
+                if(piece == null || piece.getTeamColor() != color){
+                    validMoves.add(new ChessMove(position, checkPosition, null));
+                }
+            }
 
-        for (int i = row - 1; i > 0; i--) {
-            ChessPosition checkPosition = new ChessPosition(i, col);
-            if (board.getPiece(checkPosition) == null) {
-                validMoves.add(new ChessMove(position, checkPosition, null));
-            } else if(board.getPiece(checkPosition).getTeamColor() != color){
-                validMoves.add(new ChessMove(position, checkPosition, null));
-                break; // Stop when encountering a piece
-            }else{
-                break;
+            if (col > 1) {
+                checkPosition = new ChessPosition(row + 2, col - 1);
+                piece = board.getPiece(checkPosition);
+                if (piece == null || piece.getTeamColor() != color) {
+                    validMoves.add(new ChessMove(position, checkPosition, null));
+                }
             }
         }
-        return new HashSet<ChessMove>();
+        //Check bottom direction
+        if (row >= 2) {
+            if (col != 8) {
+                checkPosition = new ChessPosition(row - 2, col + 1);
+                piece = board.getPiece(checkPosition);
+                if(piece == null || piece.getTeamColor() != color){
+                    validMoves.add(new ChessMove(position, checkPosition, null));
+                }
+            }
+            if (col > 1){
+                checkPosition = new ChessPosition(row - 2, col - 1);
+                piece = board.getPiece(checkPosition);
+                if (piece == null || piece.getTeamColor() != color) {
+                    validMoves.add(new ChessMove(position, checkPosition, null));
+                }
+            }
+        }
+
+        //Check right direction
+        if (col >= 2) {
+            if (row != 8) {
+                checkPosition = new ChessPosition(row + 1, col - 2);
+                piece = board.getPiece(checkPosition);
+                if(piece == null || piece.getTeamColor() != color){
+                    validMoves.add(new ChessMove(position, checkPosition, null));
+                }
+            }
+            if (row > 1) {
+                checkPosition = new ChessPosition(row - 1, col - 2);
+                piece = board.getPiece(checkPosition);
+                if (piece == null || piece.getTeamColor() != color) {
+                    validMoves.add(new ChessMove(position, checkPosition, null));
+                }
+            }
+        }
+
+        //Check left direction
+        if (col <= 6) {
+            if (row != 8) {
+                checkPosition = new ChessPosition(row + 1, col + 2);
+                piece = board.getPiece(checkPosition);
+                if(piece == null || piece.getTeamColor() != color){
+                    validMoves.add(new ChessMove(position, checkPosition, null));
+                }
+            }
+            if (row > 1) {
+                checkPosition = new ChessPosition(row - 1, col + 2);
+                piece = board.getPiece(checkPosition);
+                if (piece == null || piece.getTeamColor() != color) {
+                    validMoves.add(new ChessMove(position, checkPosition, null));
+                }
+            }
+        }
+
+        return validMoves;
     }
 }

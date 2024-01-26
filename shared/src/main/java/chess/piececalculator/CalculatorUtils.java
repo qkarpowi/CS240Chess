@@ -130,7 +130,6 @@ public class CalculatorUtils {
         }
     }
     public static void NorthMoves(ChessBoard board, ChessPosition position, ChessGame.TeamColor color, HashSet<ChessMove> moves, int limit){
-        // Check upper-left diagonal
         int row = position.getRow();
         int col = position.getColumn();
 

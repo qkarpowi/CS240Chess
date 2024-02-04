@@ -23,6 +23,14 @@ public class ChessBoard {
     public void addPiece(ChessPosition position, ChessPiece piece) {
         squares[position.getRow() - 1][position.getColumn() - 1] = piece;
     }
+    public void removePiece(ChessPosition position, ChessPiece piece)throws InvalidMoveException {
+        if (squares[position.getRow() - 1][position.getColumn() - 1] == piece) {
+            squares[position.getRow() - 1][position.getColumn() - 1] = null;
+        } else {
+            throw new InvalidMoveException("The piece trying to be removed does not exist.");
+        }
+
+    }
 
     @Override
     public boolean equals(Object o) {

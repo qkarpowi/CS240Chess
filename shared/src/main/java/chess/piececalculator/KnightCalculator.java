@@ -38,7 +38,7 @@ public class KnightCalculator implements PieceMovesCalculator{
             }
         }
         //Check bottom direction
-        if (row >= 2) {
+        if (row >= 3) {
             if (col != 8) {
                 checkPosition = new ChessPosition(row - 2, col + 1);
                 piece = board.getPiece(checkPosition);
@@ -56,7 +56,7 @@ public class KnightCalculator implements PieceMovesCalculator{
         }
 
         //Check right direction
-        if (col >= 2) {
+        if (col >= 3) {
             if (row != 8) {
                 checkPosition = new ChessPosition(row + 1, col - 2);
                 piece = board.getPiece(checkPosition);

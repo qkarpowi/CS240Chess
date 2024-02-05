@@ -53,7 +53,7 @@ public class PawnCalculator implements PieceMovesCalculator{
                 }
             }
             //Check right diagonal
-            if(col > 1) {
+            if(col < 8) {
                 ChessPosition right = new ChessPosition(row -1, col +1);
                 if (board.getPiece(right) != null && board.getPiece(right).getTeamColor() != color) {
                     if(row - 1 == 1){
@@ -107,7 +107,7 @@ public class PawnCalculator implements PieceMovesCalculator{
                 }
             }
             //Check right diagonal
-            if(col > 1) {
+            if(col < 8) {
                 ChessPosition right = new ChessPosition(row +1, col +1);
                 if (board.getPiece(right) != null && board.getPiece(right).getTeamColor() != color) {
                     if(row + 1 == 1){

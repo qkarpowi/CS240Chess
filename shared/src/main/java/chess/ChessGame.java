@@ -53,8 +53,9 @@ public class ChessGame {
         //test if you are still in check after move
         Collection<ChessMove> possibleMoves = this.board.getPiece(startPosition).pieceMoves(this.board, startPosition);
         Collection<ChessMove> validMoves = new HashSet<ChessMove>();
+        ChessPiece pieceToMove = this.board.getPiece(startPosition);
         for (ChessMove move : possibleMoves) {
-            ChessPiece pieceToMove = this.board.getPiece(startPosition);
+
             try {
                 ChessBoard boardCopy = (ChessBoard) this.board.clone();
                 if (move.getPromotionPiece() == null) {
@@ -63,7 +64,7 @@ public class ChessGame {
                     boardCopy.addPiece(move.getEndPosition(), new ChessPiece(this.getTeamTurn(), move.getPromotionPiece()));
                 }
                 boardCopy.removePiece(move.getStartPosition(), pieceToMove);
-                if (!internalIsInCheck(boardCopy, this.getTeamTurn())) {
+                if (!internalIsInCheck(boardCopy, pieceToMove.getTeamColor())) {
                     validMoves.add(move);
                 }
             } catch (CloneNotSupportedException | InvalidMoveException e) {
@@ -218,7 +219,9 @@ public class ChessGame {
             for (int col = 1; col <= 8; col++) {
                 ChessPiece piece = this.board.getPiece(new ChessPosition(row, col));
                 if(piece != null && piece.getTeamColor() == teamColor){
-
+                    if (!this.validMoves(new ChessPosition(row, col)).isEmpty()){
+                        return false;
+                    }
                 }
             }
         }

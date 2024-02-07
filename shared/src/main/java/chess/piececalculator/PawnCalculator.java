@@ -96,7 +96,7 @@ public class PawnCalculator implements PieceMovesCalculator{
             if(col > 1) {
                 ChessPosition left = new ChessPosition(row +1, col -1);
                 if (board.getPiece(left) != null && board.getPiece(left).getTeamColor() != color) {
-                    if(row + 1 == 1){
+                    if(row + 1 == 8){
                         validMoves.add(new ChessMove(position, left, ChessPiece.PieceType.QUEEN));
                         validMoves.add(new ChessMove(position, left, ChessPiece.PieceType.BISHOP));
                         validMoves.add(new ChessMove(position, left, ChessPiece.PieceType.ROOK));
@@ -110,7 +110,7 @@ public class PawnCalculator implements PieceMovesCalculator{
             if(col < 8) {
                 ChessPosition right = new ChessPosition(row +1, col +1);
                 if (board.getPiece(right) != null && board.getPiece(right).getTeamColor() != color) {
-                    if(row + 1 == 1){
+                    if(row + 1 == 8){
                         validMoves.add(new ChessMove(position, right, ChessPiece.PieceType.QUEEN));
                         validMoves.add(new ChessMove(position, right, ChessPiece.PieceType.BISHOP));
                         validMoves.add(new ChessMove(position, right, ChessPiece.PieceType.ROOK));

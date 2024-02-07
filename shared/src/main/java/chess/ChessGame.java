@@ -2,6 +2,7 @@ package chess;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -49,7 +50,27 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        return this.board.getPiece(startPosition).pieceMoves(this.board, startPosition);
+        //test if you are still in check after move
+        Collection<ChessMove> possibleMoves = this.board.getPiece(startPosition).pieceMoves(this.board, startPosition);
+        Collection<ChessMove> validMoves = new HashSet<ChessMove>();
+        for (ChessMove move : possibleMoves) {
+            ChessPiece pieceToMove = this.board.getPiece(startPosition);
+            try {
+                ChessBoard boardCopy = (ChessBoard) this.board.clone();
+                if (move.getPromotionPiece() == null) {
+                    boardCopy.addPiece(move.getEndPosition(), pieceToMove);
+                } else {
+                    boardCopy.addPiece(move.getEndPosition(), new ChessPiece(this.getTeamTurn(), move.getPromotionPiece()));
+                }
+                boardCopy.removePiece(move.getStartPosition(), pieceToMove);
+                if (!internalIsInCheck(boardCopy, this.getTeamTurn())) {
+                    validMoves.add(move);
+                }
+            } catch (CloneNotSupportedException | InvalidMoveException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return validMoves;
     }
 
     /**
@@ -68,7 +89,29 @@ public class ChessGame {
             throw new InvalidMoveException("Move not valid for this piece");
         }
 
-        this.board.addPiece(move.getEndPosition(), pieceToMove);
+        //test if you are still in check after move
+        if(this.isInCheck(this.getTeamTurn())){
+            try{
+                ChessBoard boardCopy = (ChessBoard) this.board.clone();
+                if(move.getPromotionPiece() == null) {
+                    boardCopy.addPiece(move.getEndPosition(), pieceToMove);
+                } else {
+                    boardCopy.addPiece(move.getEndPosition(), new ChessPiece(this.getTeamTurn(), move.getPromotionPiece()));
+                }
+                boardCopy.removePiece(move.getStartPosition(), pieceToMove);
+                if (internalIsInCheck(boardCopy, this.getTeamTurn())) {
+                    throw new InvalidMoveException("After making move you are still in check");
+                }
+            } catch (CloneNotSupportedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        if(move.getPromotionPiece() == null) {
+            this.board.addPiece(move.getEndPosition(), pieceToMove);
+        } else {
+            this.board.addPiece(move.getEndPosition(), new ChessPiece(this.getTeamTurn(), move.getPromotionPiece()));
+        }
         this.board.removePiece(move.getStartPosition(), pieceToMove);
 
         //Switch Team turns.
@@ -86,30 +129,35 @@ public class ChessGame {
      * @return True if the specified team is in check
      */
     public boolean isInCheck(TeamColor teamColor) {
-        ChessPosition kingPosition = this.kingPosition(teamColor);
+        return this.internalIsInCheck(this.board, teamColor);
+    }
+
+    private boolean internalIsInCheck(ChessBoard board, TeamColor teamColor) {
+        ChessPosition kingPosition = this.kingPosition(board, teamColor);
+        if (kingPosition == null) return false;
         for (int row = 1; row <= 8; row++){
             for (int col = 1; col <= 8; col++){
                 ChessPosition position = new ChessPosition(row, col);
-                 ChessPiece piece = this.board.getPiece(new ChessPosition(row, col));
-                 if (piece != null && piece.getTeamColor() != teamColor) {
-                     Collection<ChessMove> possibleMoves = piece.pieceMoves(this.board, position);
-                     for (ChessMove possibleMove : possibleMoves) {
-                         ChessPosition positionToCheck = possibleMove.getEndPosition();
-                         if (positionToCheck.getRow() == kingPosition.getRow() && positionToCheck.getColumn() == kingPosition.getColumn()){
-                             return true;
-                         }
-                     }
-                 }
+                ChessPiece piece = board.getPiece(new ChessPosition(row, col));
+                if (piece != null && piece.getTeamColor() != teamColor) {
+                    Collection<ChessMove> possibleMoves = piece.pieceMoves(board, position);
+                    for (ChessMove possibleMove : possibleMoves) {
+                        ChessPosition positionToCheck = possibleMove.getEndPosition();
+                        if (positionToCheck.getRow() == kingPosition.getRow() && positionToCheck.getColumn() == kingPosition.getColumn()){
+                            return true;
+                        }
+                    }
+                }
             }
         }
         return false;
     }
 
-    private ChessPosition kingPosition( TeamColor color) {
+    private ChessPosition kingPosition(ChessBoard board, TeamColor color) {
         for (int row = 1; row <= 8; row++){
             for (int col = 1; col <= 8; col ++){
                 ChessPosition position = new ChessPosition(row, col);
-                ChessPiece piece = this.board.getPiece(position);
+                ChessPiece piece = board.getPiece(position);
                 if (piece != null && piece.equals(new ChessPiece(color, ChessPiece.PieceType.KING))) {
                     return position;
                 }
@@ -125,8 +173,37 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
+        if (!this.isInCheck(teamColor)){
+            return false;
+        }
 
-        throw new RuntimeException("Not implemented");
+        //Test every move that color can make and if they are still in check after making those moves it is check mate.
+        for (int row = 1; row <= 8; row++){
+            for (int col = 1; col <= 8; col ++){
+                ChessPosition position = new ChessPosition(row, col);
+                ChessPiece piece = this.board.getPiece(position);
+                if (piece != null && piece.getTeamColor() == teamColor) {
+                    Collection<ChessMove> possibleMoves = piece.pieceMoves(this.board, position);
+                    for (ChessMove possibleMove : possibleMoves) {
+                        try{
+                            ChessBoard boardCopy = (ChessBoard) this.board.clone();
+                            if(possibleMove.getPromotionPiece() == null) {
+                                boardCopy.addPiece(possibleMove.getEndPosition(), piece);
+                            } else {
+                                boardCopy.addPiece(possibleMove.getEndPosition(), new ChessPiece(teamColor, possibleMove.getPromotionPiece()));
+                            }
+                            boardCopy.removePiece(possibleMove.getStartPosition(), piece);
+                            if (!internalIsInCheck(boardCopy, teamColor)) {
+                                return false;
+                            }
+                        } catch (CloneNotSupportedException | InvalidMoveException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     /**
@@ -137,8 +214,15 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
+        for (int row = 1; row <= 8; row++) {
+            for (int col = 1; col <= 8; col++) {
+                ChessPiece piece = this.board.getPiece(new ChessPosition(row, col));
+                if(piece != null && piece.getTeamColor() == teamColor){
 
-        throw new RuntimeException("Not implemented");
+                }
+            }
+        }
+        return true;
     }
 
     /**

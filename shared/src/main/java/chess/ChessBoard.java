@@ -8,7 +8,7 @@ import java.util.Arrays;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessBoard {
+public class ChessBoard implements Cloneable{
     private ChessPiece[][] squares = new ChessPiece[8][8];
     public ChessBoard() {
         
@@ -24,7 +24,7 @@ public class ChessBoard {
         squares[position.getRow() - 1][position.getColumn() - 1] = piece;
     }
     public void removePiece(ChessPosition position, ChessPiece piece)throws InvalidMoveException {
-        if (squares[position.getRow() - 1][position.getColumn() - 1] == piece) {
+        if (squares[position.getRow() - 1][position.getColumn() - 1].getPieceType() == piece.getPieceType() && squares[position.getRow() - 1][position.getColumn() - 1].getTeamColor() == piece.getTeamColor()) {
             squares[position.getRow() - 1][position.getColumn() - 1] = null;
         } else {
             throw new InvalidMoveException("The piece trying to be removed does not exist.");
@@ -51,7 +51,18 @@ public class ChessBoard {
                 "squares=" + Arrays.deepToString(squares) +
                 '}';
     }
-
+    @Override
+    public ChessBoard clone() throws CloneNotSupportedException {
+        ChessBoard clone = new ChessBoard();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (this.squares[i][j] != null) {
+                    clone.squares[i][j] = new ChessPiece(this.squares[i][j].getTeamColor(), this.squares[i][j].getPieceType());
+                }
+            }
+        }
+        return clone;
+    }
     /**
      * Gets a chess piece on the chessboard
      *
